@@ -1,0 +1,157 @@
+<app-header></app-header>
+<div class="parent">
+  <!-- TradingView Chart Section -->
+  <div class="div1">
+    <div id="tradingview_12345">
+      <div id="chart" style="width: 100%; height: 400px;"></div>
+      <div style="position: absolute; top: 20px; left: 30px; z-index: 3;">
+        <h3 style="color:#00c853; margin:0; font-size:1.2rem;">Gráfico en tiempo real</h3>
+        <span style="color:#ff9100; font-size:0.95rem;">Símbolo actual: <strong>{{ symbol }}</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Symbol Search & Table Section -->
+  <div class="div2">
+    <div class="stock-table-container">
+      <div class="search-container">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchQuery"
+          (input)="filterSymbols()"
+          placeholder="Buscar símbolos..."
+        />
+        <i class="search-icon fa fa-search"></i>
+      </div>
+      <div style="margin-top:1rem;">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Símbolo</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let symbol of filteredSymbols; let i = index">
+              <td>{{ symbol }}</td>
+              <td>
+                <button class="buy-btn" (click)="showSymbol(symbol)">Ver</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Table & Modal Section -->
+  <div class="div3">
+    <div class="stock-table-container">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let action of actions" (click)="toggleDetails(action)">
+            <td>
+              <span [ngClass]="{
+                'buy-order': action.tipo_orden.toLowerCase().includes('buy'),
+                'sell-order': action.tipo_orden.toLowerCase().includes('sell')
+              }">{{ action.tipo_orden }}</span>
+            </td>
+            <td>${{ action.precio }}</td>
+            <td>{{ action.fecha_hora }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-backdrop" *ngIf="selectedAction" (click)="selectedAction = null">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <button class="close-button" (click)="selectedAction = null">&times;</button>
+        <h2>Detalles de la Orden</h2>
+        <div class="order-detail">
+          <span>ID:</span> <strong>{{ selectedAction.id }}</strong>
+        </div>
+        <div class="order-detail">
+          <span>Tipo:</span>
+          <strong [ngClass]="{
+            'buy-order': selectedAction.tipo_orden.toLowerCase().includes('buy'),
+            'sell-order': selectedAction.tipo_orden.toLowerCase().includes('sell')
+          }">{{ selectedAction.tipo_orden }}</strong>
+        </div>
+        <div class="order-detail">
+          <span>Precio:</span>
+          <strong>${{ selectedAction.precio }}</strong>
+        </div>
+        <div class="order-detail">
+          <span>Fecha y Hora:</span>
+          <strong>{{ selectedAction.fecha_hora }}</strong>
+        </div>
+        @if(rol == 3){
+          <button class="buy-btn" (click)="makeContract(selectedAction.usuario_id, selectedAction.comision)">Hacer contrato</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock Card / Contracts Section -->
+  <div class="div4">
+    <div class="stock-card">
+      @if(rol != 3)  {
+        <div class="stock-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h2>{{ symbol }}</h2>
+            <span class="price">${{ stockPrice.toFixed(2) }}</span>
+          </div>
+          <div style="text-align:right;">
+            <span style="color:#ff9100; font-size:1rem;">Disponible para comprar/vender</span>
+          </div>
+        </div>
+        <div class="stock-body">
+          <div class="quantity-selector" style="display:flex; align-items:center; gap:1rem;">
+            <label for="quantity">Cantidad:</label>
+            <button (click)="decreaseQuantity()" [disabled]="buyQuantity <= 1">-</button>
+            <span>{{ buyQuantity }}</span>
+            <button (click)="increaseQuantity()">+</button>
+          </div>
+          <p>Total: <strong>${{ (buyQuantity * stockPrice).toFixed(2) }}</strong></p>
+        </div>
+        <div class="stock-actions">
+          <button class="buy-btn" (click)="buyStock()">Comprar</button>
+          <button class="sell-btn" (click)="sellStock()">Vender</button>
+        </div>
+      } @else {
+        <h2>Contratos Activos</h2>
+        <div class="stock-header">
+          <table>
+            <thead>
+              <tr>
+                <th># Contrato</th>
+                <th>Fecha</th>
+                <th>Comisión ($)</th>
+                <th>Inversionista</th>
+                <th>Comisionista</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let contrato of contratos">
+                <td>{{ contrato.numero_contrato }}</td>
+                <td>{{ contrato.fecha_hora_inicio  }}</td>
+                <td>{{ contrato.comision }}</td>
+                <td>{{ contrato.inversionista_id }}</td>
+                <td>{{ contrato.comisionista_id }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>

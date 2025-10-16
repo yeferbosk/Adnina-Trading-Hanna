@@ -1,0 +1,23 @@
+<header class="app-header">
+  <div class="user-info">
+    <img *ngIf="userCountry" [src]="getFlagUrl(userCountry)" alt="Bandera" class="country-flag">
+    <span class="user-name">{{ userName }}</span>
+    <span class="user-role">{{ userRole }}</span>
+
+    @if(userRole == "Accionista"){
+      <span class="portfolaio-value">Money ${{money}}</span>
+      <span class="portfolio-value">Portafolio: ${{ portfolioUSD | number:'1.2-2' }}</span>
+    }
+  </div>
+  @if(isAdmin && !isAdminRoute){
+    <button class="logout-btn" (click)="admin()">Panel administracion</button>
+  }
+
+
+  @if(isAdminRoute){
+    <button class="logout-btn" (click)="andina()">Andina</button>
+  }
+
+
+  <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
+</header>

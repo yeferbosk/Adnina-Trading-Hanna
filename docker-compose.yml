@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_andina
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "1234"
+      MYSQL_DATABASE: "andina"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build:
+      context: ./Backend-AndinaTrading
+      dockerfile: Dockerfile
+    container_name: spring_andina
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/andina
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./Frontend-AndinaTrading
+      dockerfile: Dockerfile
+    container_name: angular_andina
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+    restart: on-failure
+
+volumes:
+  mysql_data:
